@@ -1,12 +1,12 @@
 # build artifacts
-build/
+**/build/
 *.o
 *.elf
 *.bin
 *.map
 
 # IDE
-.vscode/
+**/.vscode/
 *.swp
 
 # os
