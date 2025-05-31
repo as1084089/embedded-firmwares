@@ -8,6 +8,7 @@ BUILD_DIR = build
 SRC_DIR = src
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
+ASMS = $(patsubst %.c,$(SRC_DIR)/%.s,$(notdir $(SRCS)))
 OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 
 CFLAGS = -mcpu=cortex-m3 -mthumb -Os -Wall -ffreestanding -nostdlib -nostartfiles
@@ -15,9 +16,13 @@ LDFLAGS = -T lm3s6965.ld -nostdlib
 
 all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).bin
 
+asm: $(SRC_DIR) $(ASMS)
+
+$(SRC_DIR)/%.s: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -S -fverbose-asm -o $@ $<
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
-
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
