@@ -1,22 +1,14 @@
 // main.c
-volatile unsigned int *UART0_DR = (unsigned int *)0x4000C000;
+#define ASCII_OFFSET 48
 
-void uart_putc(char c);
-void uart_puts(const char *str);
+#include "types.h"
+#include "uart_print.h"
+
+//extern volatile unsigned int* UART0_DR;
 
 int main() {
     const char *hello = "Hello QEMU!\n";
     uart_puts(hello);
     while (1);
     return 0;
-}
-
-void uart_putc(char c) {
-    *UART0_DR = c;
-}
-
-void uart_puts(const char *str) {
-    while (*str) {
-        uart_putc(*str++);
-    }
 }
