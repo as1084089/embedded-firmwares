@@ -79,10 +79,7 @@ void Reset_Handler(void)
     __init_process_pool();
     __init_process_context(main);
 
-    uart_print_str("main function PCB initialized"); PR_ENDL;
-
     systick_init(50000);
-    uart_print_str("sysTick initialized"); PR_ENDL;
 
     // main() 호출
     //main();
@@ -107,8 +104,6 @@ void HardFault_Handler(void) {
     while (1);
 }
 
-
-
 // 디폴트 핸들러 (사용자 정의되지 않은 인터럽트 진입 시)
 void Default_Handler(void)
 {
@@ -126,21 +121,6 @@ void SVCall_Handler(void)
     return;
 }
 
-// __attribute__((naked)) void PendSV_Handler(void) {
-//     __asm__ __volatile__ (
-//         // PSP 설정 (현재 유일한 프로세스 = ID 0)
-//         "msr psp, %[proc_sp]            \n"  // r0 ← __proc_list[0].process_stack_pointer
-
-//         // r4~r11 수동 복원
-//         "ldmia r0!, {r4-r11}            \n"
-
-//         // exception return: PSP로부터 자동 복원 (r0~r3, r12, lr, pc, xPSR)
-//         "ldr lr, =0xFFFFFFFD           \n" // Return to Thread mode, PSP
-//         "bx lr                         \n"
-//         :: [proc_sp] "r" (__proc_list[0].process_stack_pointer)
-//         : "r0", "memory"
-//     );
-// }
 __attribute__((naked)) void PendSV_Handler(void) {
     void* sp = __proc_list[0].process_stack_pointer;
     __asm__ __volatile__ (
@@ -157,6 +137,5 @@ __attribute__((naked)) void PendSV_Handler(void) {
 
 void SysTick_Handler(void) {
     uart_print_str("entered SysTick Handler"); PR_ENDL;
-    uart_print_hex((__u32)__proc_list[0].process_stack_pointer); PR_ENDL;
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
