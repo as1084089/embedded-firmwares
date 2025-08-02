@@ -6,7 +6,7 @@ __attribute__ ((section(".bss")))
 char uart_print_buf[10];
 
 void clear_buf() {
-    for (i32 iter = 0; iter < 10; iter++) {
+    for (__i32 iter = 0; iter < 10; iter++) {
         uart_print_buf[iter] = 0;
     }
 }
@@ -21,8 +21,8 @@ void uart_print_str(const char *str) {
     }
 }
 
-void uart_print_dec(i32 num) {
-    i32 iter = 0;
+void uart_print_dec(__i32 num) {
+    __i32 iter = 0;
     if (num == 0) {
         uart_print_char('0');
         return;
@@ -42,12 +42,12 @@ void uart_print_dec(i32 num) {
 }
 
 /* 2025.06.01 am 02:34 / dahun / bug-fix
- * string declaration (char *) in the fuction makes the compiler save link register using push instruction
- * at the beginning of the function and pop it at the end of the function. But it seems to lead to the panic.
+ * Declaration of string literal in the fuction makes the compiler save link register using push instruction
+ * at the beginning of the function and pop it at the end of the function, and it seems to lead to the panic.
  * So replaced the string and `uart_print_str()` function usage with the combination of `uart_print_char()`.
  */
-void uart_print_hex(u32 num) {
-    i32 iter = 0;
+void uart_print_hex(__u32 num) {
+    __i32 iter = 0;
     if (num == 0) {
         uart_print_char('0');
         uart_print_char('x');

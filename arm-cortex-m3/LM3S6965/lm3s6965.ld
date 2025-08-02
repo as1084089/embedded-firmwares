@@ -33,7 +33,17 @@ SECTIONS
 
   .stack :
   {
-    . = ALIGN(8);
-    _stack_top = .;
+    . = ALIGN(0x8);
+    _stack_end = .;         /* stack의 끝점, 낮은 주소 */
+    . += 0x1000;
+    _stack_start = .;       /* stack의 시작점, 높은 주소 */
+  } > SRAM
+
+  .psp_pool :
+  {
+    . = ALIGN(0x1000);
+    _psp_pool_end = .;
+    . += 0x8000;            /* 32KB size for the process stack pool */
+    _psp_pool_start = .;
   } > SRAM
 }

@@ -4,28 +4,36 @@ OBJCOPY = arm-none-eabi-objcopy
 SIZE = arm-none-eabi-size
 
 TARGET = main
-BUILD_DIR = build
-SRC_DIR = src
+ASM_DIR = asms
+BUILD_DIR = builds
+SRC_DIR = sources
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
-ASMS = $(patsubst %.c,$(SRC_DIR)/%.s,$(notdir $(SRCS)))
+#ASMS = $(patsubst %.c,$(SRC_DIR)/%.s,$(notdir $(SRCS)))
+ASMS = $(patsubst %.c,$(ASM_DIR)/%.s,$(notdir $(SRCS)))
 OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 
 CFLAGS = -mcpu=cortex-m3 -mthumb -Os -Wall -ffreestanding -nostdlib -nostartfiles
+INCLUDES = -Iincludes
 LDFLAGS = -T lm3s6965.ld -nostdlib
+
+.PHONY: all asm clean help
 
 all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).bin
 
-asm: $(SRC_DIR) $(ASMS)
+asm: $(ASM_DIR) $(ASMS)
 
-$(SRC_DIR)/%.s: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -S -fverbose-asm -o $@ $<
+$(ASM_DIR):
+	mkdir -p $(ASM_DIR)
+
+$(ASM_DIR)/%.s: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDES) -S -fverbose-asm -o $@ $<
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
@@ -36,3 +44,10 @@ $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+help:
+	@echo "Available targets:"
+	@echo "  all      - Build the project (default)"
+	@echo "  asm      - Generate assembly (.s) files from C sources"
+	@echo "  clean    - Remove all build files"
+	@echo "  help     - Show this help message"
