@@ -16,7 +16,6 @@ int main() {
     uart_print_hex(0xaaf998f0); PR_ENDL;
     uart_print_str("End"); PR_ENDL;
     print_sysreg(); PR_ENDL;
-    //svcall();
     uart_print_str("After svcall"); PR_ENDL;
     print_sysreg(); PR_ENDL;
 
@@ -24,16 +23,8 @@ int main() {
     return 0;
 }
 
-// void print_sysreg() {
-//     u32 __psr = 0;
-//     __asm__ __volatile__ (
-//         "MRS R0, CONTROL" : "=r"(__psr)
-//     );
-//     uart_print_hex(__psr);
-// }
-
 void set_control_to_use_psp() {
-    __u32 __control = 0x00000002;
+    uint32_t __control = 0x00000002;
     __asm__ __volatile__ (
         "MSR CONTROL, R0" :: "r"(__control)
     );

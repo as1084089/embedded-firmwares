@@ -9,12 +9,12 @@
 #define ASCII_SCHAR_OFFSET 'a'
 #define PR_ENDL uart_println()
 
-static volatile unsigned int *UART0_DR = (unsigned int *)0x4000C000;
+extern volatile uint32_t *UART0_DR;
 
 void uart_print_char(char c);
 void uart_print_str(const char *str);
-void uart_print_dec(__i32 num);
-void uart_print_hex(__u32 num);
+void uart_print_dec(int32_t num);
+void uart_print_hex(uint32_t num);
 void uart_println();
 
 #endif /* CD269808_58CD_4AE2_815D_3152075C317B */

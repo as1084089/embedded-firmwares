@@ -1,12 +1,12 @@
 #include "uart_print.h"
 
-extern volatile unsigned int* UART0_DR;
+volatile uint32_t* UART0_DR  = (uint32_t*)0x4000C000;
 
 __attribute__ ((section(".bss")))
 char uart_print_buf[10];
 
 void clear_buf() {
-    for (__i32 iter = 0; iter < 10; iter++) {
+    for (int32_t iter = 0; iter < 10; iter++) {
         uart_print_buf[iter] = 0;
     }
 }
@@ -21,8 +21,8 @@ void uart_print_str(const char *str) {
     }
 }
 
-void uart_print_dec(__i32 num) {
-    __i32 iter = 0;
+void uart_print_dec(int32_t num) {
+    int32_t iter = 0;
     if (num == 0) {
         uart_print_char('0');
         return;
@@ -46,8 +46,8 @@ void uart_print_dec(__i32 num) {
  * at the beginning of the function and pop it at the end of the function, and it seems to lead to the panic.
  * So replaced the string and `uart_print_str()` function usage with the combination of `uart_print_char()`.
  */
-void uart_print_hex(__u32 num) {
-    __i32 iter = 0;
+void uart_print_hex(uint32_t num) {
+    int32_t iter = 0;
     if (num == 0) {
         uart_print_char('0');
         uart_print_char('x');

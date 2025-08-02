@@ -6,14 +6,14 @@ __pcb_t __proc_list[__MAX_PROC_NUM];
 
 void __init_process_pool() {
     __pp.process_counter = 0;
-    for (__u32 iter = 0; iter < __MAX_PROC_NUM; iter++) {
+    for (uint32_t iter = 0; iter < __MAX_PROC_NUM; iter++) {
         __proc_list[iter].process_id = 0;
         __proc_list[iter].process_stack_pointer = 0;
     }
     __pp.psp_pool_top = &_psp_pool_start;
 }
 
-__i32 __init_process_control_block() {
+int32_t __init_process_control_block() {
     // if the number of processes are the maximum,
     if (__pp.process_counter >= __MAX_PROC_NUM) {
         return -1;  // cannot initialize new process
@@ -26,15 +26,15 @@ __i32 __init_process_control_block() {
     }
 }
 
-void __init_process_context(__addr func) {
-    __i32 ret = __init_process_control_block();
+void __init_process_context(addr_t func) {
+    int32_t ret = __init_process_control_block();
     if (ret < 0) return;
 
-    __u32 *psp = (__u32*)__proc_list[ret].process_stack_pointer;
+    uint32_t *psp = (uint32_t*)__proc_list[ret].process_stack_pointer;
 
     // Exception Stack Frame: r0~r3, r12, lr, pc, xPSR
     *(--psp) = 0x01000000;     // xPSR (T-bit = 1)
-    *(--psp) = (__u32)func;    // pc
+    *(--psp) = (uint32_t)func;    // pc
     *(--psp) = 0xFFFFFFFD;     // lr (exception return → thread, PSP)
     *(--psp) = 0x00000000;     // r12
     *(--psp) = 0x00000000;     // r3
@@ -52,5 +52,5 @@ void __init_process_context(__addr func) {
     *(--psp) = 0x00000000; // r5
     *(--psp) = 0x00000000; // r4
 
-    __proc_list[ret].process_stack_pointer = (__addr)psp;
+    __proc_list[ret].process_stack_pointer = (addr_t)psp;
 }

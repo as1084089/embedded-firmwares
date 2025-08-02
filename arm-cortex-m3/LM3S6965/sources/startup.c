@@ -12,7 +12,7 @@ void SVCall_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 
-void systick_init(__u32 ticks) {
+void systick_init(uint32_t ticks) {
     SysTick->LOAD   = ticks - 1;
     SysTick->VAL    = 0;
     SysTick->CTRL   = SysTick_CTRL_CLKSOURCE_Msk
@@ -21,7 +21,7 @@ void systick_init(__u32 ticks) {
 }
 
 void print_sysreg() {
-    __u32 __psr = 0;
+    uint32_t __psr = 0;
     __asm__ __volatile__ (
         "MRS R0, PSR" : "=r"(__psr)
     );
@@ -29,33 +29,32 @@ void print_sysreg() {
 }
 
 extern int main(void);
-// extern __pcb_t __proc_list[];
-// extern volatile __pp_t __pp;
+extern uint32_t __get_PSP(void);
 
 // 외부 심볼 (링커 스크립트에서 제공)
-extern __u32 _etext;
-extern __u32 _sdata;
-extern __u32 _edata;
-extern __u32 _sbss;
-extern __u32 _ebss;
-extern __u32 _stack_start;
+extern uint32_t _etext;
+extern uint32_t _sdata;
+extern uint32_t _edata;
+extern uint32_t _sbss;
+extern uint32_t _ebss;
+extern uint32_t _stack_start;
 
 // 인터럽트 벡터 테이블
 __attribute__ ((section(".isr_vector")))
-const __u32 VectorTable[] = {
-    (__u32)&_stack_start,   // 초기 스택 포인터
-    (__u32)Reset_Handler, // 리셋 핸들러
-    (__u32)Default_Handler, // NMI
-    (__u32)HardFault_Handler, // Hard Fault
-    (__u32)Default_Handler, // Memory Management Fault
-    (__u32)Default_Handler, // Bus Fault
-    (__u32)Default_Handler, // Usage Fault
+const uint32_t VectorTable[] = {
+    (uint32_t)&_stack_start,   // 초기 스택 포인터
+    (uint32_t)Reset_Handler, // 리셋 핸들러
+    (uint32_t)Default_Handler, // NMI
+    (uint32_t)HardFault_Handler, // Hard Fault
+    (uint32_t)Default_Handler, // Memory Management Fault
+    (uint32_t)Default_Handler, // Bus Fault
+    (uint32_t)Default_Handler, // Usage Fault
     0, 0, 0, 0,                // Reserved
-    (__u32)SVCall_Handler, // SVCall
-    (__u32)Default_Handler, // Debug monitor
+    (uint32_t)SVCall_Handler, // SVCall
+    (uint32_t)Default_Handler, // Debug monitor
     0,                         // Reserved
-    (__u32)PendSV_Handler, // PendSV
-    (__u32)SysTick_Handler, // SysTick
+    (uint32_t)PendSV_Handler, // PendSV
+    (uint32_t)SysTick_Handler, // SysTick
     // 여기에 추가 인터럽트 핸들러들 작성 가능
 };
 
@@ -63,8 +62,8 @@ const __u32 VectorTable[] = {
 void Reset_Handler(void)
 {
     // .data 섹션 복사 (플래시 → RAM)
-    __u32 *src = &_etext;
-    __u32 *dst = &_sdata;
+    uint32_t *src = &_etext;
+    uint32_t *dst = &_sdata;
     while (dst < &_edata) {
         *dst++ = *src++;
     }
@@ -74,21 +73,15 @@ void Reset_Handler(void)
     while (dst < &_ebss) {
         *dst++ = 0;
     }
-    //print_sysreg(); PR_ENDL;
 
     __init_process_pool();
     __init_process_context(main);
 
     systick_init(50000);
 
-    // main() 호출
-    //main();
-
     // main에서 리턴하지 않도록 루프
     while (1) {}
 }
-
-extern uint32_t __get_PSP(void);
 
 void HardFault_Handler(void) {
     uint32_t* psp = (uint32_t*)__get_PSP();
@@ -136,6 +129,7 @@ __attribute__((naked)) void PendSV_Handler(void) {
 }
 
 void SysTick_Handler(void) {
+    PR_ENDL; PR_ENDL;
     uart_print_str("entered SysTick Handler"); PR_ENDL;
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
