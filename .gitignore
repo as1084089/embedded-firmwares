@@ -1,9 +1,12 @@
 # build artifacts
-**/build/
+**/builds/
 *.o
 *.elf
 *.bin
 *.map
+
+# assemblys
+**/asms/
 *.s
 
 # IDE
