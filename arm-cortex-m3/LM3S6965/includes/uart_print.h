@@ -3,13 +3,12 @@
 
 #pragma once
 #include "types.h"
+#include "lm3s6965.h"
 
 #define ASCII_DIGIT_OFFSET '0'
 #define ASCII_CCHAR_OFFSET 'A'
 #define ASCII_SCHAR_OFFSET 'a'
 #define PR_ENDL uart_println()
-
-extern volatile uint32_t *UART0_DR;
 
 void uart_print_char(char c);
 void uart_print_str(const char *str);

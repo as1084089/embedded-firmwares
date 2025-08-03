@@ -28,6 +28,39 @@ void print_sysreg() {
     uart_print_hex(__psr);
 }
 
+// 상태 문자열 길이를 무조건 8자로 맞춥니다.
+const char* ps_state_str(__ps_t state) {
+    switch (state) {
+        case 0: return "READY   ";
+        case 1: return "RUNNING ";
+        case 2: return "WAITING ";
+        default: return "UNKNOWN ";
+    }
+}
+
+void print_proc_list(void) {
+    uart_println();
+    uart_print_str(" ID |  STATE   |    PSP      | CURRENT "); PR_ENDL;
+    uart_print_str("------------------------------------------"); PR_ENDL;
+    for (int i = 0; i < __MAX_PROC_NUM; i++) {
+        uart_print_str(" ");
+        uart_print_dec(__proc_list[i].process_id);
+        uart_print_str("  | ");
+
+        uart_print_str(ps_state_str(__proc_list[i].process_state));
+        uart_print_str("| ");
+        uart_print_hex((uint32_t)__proc_list[i].process_stack_pointer);
+        uart_print_str(" | ");
+
+        if (&__proc_list[i] == __current_running) {
+            uart_print_str("<- current");
+        }
+        PR_ENDL;
+    }
+    uart_print_str("------------------------------------------"); PR_ENDL;
+    uart_println();
+}
+
 extern int main(void);
 extern uint32_t __get_PSP(void);
 
@@ -77,16 +110,19 @@ void Reset_Handler(void)
     __init_process_pool();
     __init_process_context(main);
 
-    systick_init(50000);
+    systick_init(3500);
 
-    // main에서 리턴하지 않도록 루프
-    while (1) {}
+    __start();
+    while (1);
 }
 
 void HardFault_Handler(void) {
-    uint32_t* psp = (uint32_t*)__get_PSP();
+    uint32_t* psp = (uint32_t*)__current_running->process_stack_pointer;
 
     uart_print_str("HardFault!\n");
+
+    print_proc_list();
+
     uart_print_hex((uint32_t)psp); PR_ENDL;
 
     for (int i = 0; i < 16; i++) {
@@ -109,27 +145,13 @@ void SVCall_Handler(void)
 {
     uart_print_str("entered SVCall handler\n"); PR_ENDL;
     print_sysreg();
-    //volatile int test = 1234;
-    //(void)test;
     return;
 }
 
 __attribute__((naked)) void PendSV_Handler(void) {
-    void* sp = __proc_list[0].process_stack_pointer;
-    __asm__ __volatile__ (
-        "msr psp, %[psp]         \n"
-        "ldmia %[psp]!, {r4-r11} \n"
-        "msr psp, %[psp]         \n"
-        "ldr lr, =0xFFFFFFFD     \n"
-        "bx lr                   \n"
-        :
-        : [psp] "r" (sp)
-        : "memory"
-    );
+    __schedule();
 }
 
 void SysTick_Handler(void) {
-    PR_ENDL; PR_ENDL;
-    uart_print_str("entered SysTick Handler"); PR_ENDL;
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }

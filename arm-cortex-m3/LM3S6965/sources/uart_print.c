@@ -1,7 +1,5 @@
 #include "uart_print.h"
 
-volatile uint32_t* UART0_DR  = (uint32_t*)0x4000C000;
-
 __attribute__ ((section(".bss")))
 char uart_print_buf[10];
 
@@ -12,7 +10,8 @@ void clear_buf() {
 }
 
 void uart_print_char(char c) {
-    *UART0_DR = c;
+    volatile uint32_t *uport = (uint32_t *)UART0_BASE;
+    *uport = c;
 }
 
 void uart_print_str(const char *str) {
