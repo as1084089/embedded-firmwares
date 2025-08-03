@@ -16,8 +16,9 @@ Project for Embedded Firmware Development Practice
 * macOS (Sequoia)
 
 ## Project Structure
-- `src/` : Source code files
-- `build/` : Build output files
+- `sources/` : Source code files
+- `includes/` : Header files
+- `builds/` : Build output files
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
