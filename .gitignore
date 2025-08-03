@@ -12,6 +12,7 @@
 # IDE
 **/.vscode/
 *.swp
+*.code-workspace
 
 # os
 .DS_Store
