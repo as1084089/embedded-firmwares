@@ -88,9 +88,9 @@ __pcb_t* __search_ready_proc() {
 
 void __idle_task(void) {
     while (1) {
-        uint32_t psp;
-        __asm__ volatile ("mrs %0, psp" : "=r"(psp));
-        uart_print_str("PSP: ");
-        uart_print_hex(psp); PR_ENDL;
+        // uint32_t psp;
+        // __asm__ volatile ("mrs %0, psp" : "=r"(psp));
+        // uart_print_str("PSP: ");
+        // uart_print_hex(psp); PR_ENDL;
     }
 }
