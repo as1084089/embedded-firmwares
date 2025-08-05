@@ -1,7 +1,7 @@
 // main.c
 
 #include "types.h"
-#include "uart_print.h"
+#include "uart.h"
 
 int main() {
     const char *hello = "Hello QEMU!";

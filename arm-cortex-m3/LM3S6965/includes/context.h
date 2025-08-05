@@ -3,7 +3,6 @@
 
 #include "types.h"
 #include "process.h"
-#include "uart_print.h"
 
 #pragma once
 

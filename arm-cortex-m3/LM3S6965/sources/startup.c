@@ -1,6 +1,6 @@
 #include "core_cm3.h"
 #include "types.h"
-#include "uart_print.h"
+#include "uart.h"
 #include "process.h"
 #include "context.h"
 
@@ -53,7 +53,7 @@ void print_proc_list(void) {
 }
 
 extern int main(void);
-extern void uart_input(void);
+extern void terminal(void);
 extern uint32_t __get_PSP(void);
 
 // 외부 심볼 (링커 스크립트에서 제공)
@@ -100,7 +100,7 @@ void Reset_Handler(void)
     }
 
     __init_process_pool();
-    __init_process_context(uart_input);
+    __init_process_context(terminal);
 
     systick_init(50000);
 

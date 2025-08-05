@@ -1,5 +1,5 @@
 #include "process.h"
-#include "uart_print.h"
+#include "uart.h"
 
 __pp_t __pp;
 __pcb_t __proc_list[__MAX_PROC_NUM];
@@ -81,16 +81,6 @@ __pcb_t* __search_ready_proc() {
     return NULL;
 }
 
-// void __idle_task() {
-//     uart_print_char('a'); PR_ENDL;
-//     while (1) {}
-// }
-
 void __idle_task(void) {
-    while (1) {
-        // uint32_t psp;
-        // __asm__ volatile ("mrs %0, psp" : "=r"(psp));
-        // uart_print_str("PSP: ");
-        // uart_print_hex(psp); PR_ENDL;
-    }
+    while (1) {}
 }

@@ -1,9 +1,13 @@
-#include "uart_print.h"
+#include "uart.h"
+#include "lm3s6965.h"
 
-__attribute__ ((section(".bss")))
-char uart_print_buf[10];
+#define ASCII_DIGIT_OFFSET '0'
+#define ASCII_CCHAR_OFFSET 'A'
+#define ASCII_SCHAR_OFFSET 'a'
 
-void clear_buf() {
+static char uart_print_buf[10];
+
+static void clear_buf(void) {
     for (int32_t iter = 0; iter < 10; iter++) {
         uart_print_buf[iter] = 0;
     }
@@ -40,11 +44,6 @@ void uart_print_dec(int32_t num) {
     clear_buf();
 }
 
-/* 2025.06.01 am 02:34 / dahun / bug-fix
- * Declaration of string literal in the fuction makes the compiler save link register using push instruction
- * at the beginning of the function and pop it at the end of the function, and it seems to lead to the panic.
- * So replaced the string and `uart_print_str()` function usage with the combination of `uart_print_char()`.
- */
 void uart_print_hex(uint32_t num) {
     int32_t iter = 0;
     if (num == 0) {
@@ -68,6 +67,11 @@ void uart_print_hex(uint32_t num) {
     clear_buf();
 }
 
-void uart_println() {
+void uart_println(void) {
     uart_print_char('\n');
+}
+
+char uart_getc(void) {
+    while (UART0->FR & (1 << 4));
+    return (char)(UART0->DR & 0xFF);
 }
