@@ -1,1 +1,1 @@
-qemu-system-arm -M lm3s6965evb -kernel builds/main.elf -nographic
+qemu-system-arm -M lm3s6965evb -kernel builds/lm3s6965.elf -nographic

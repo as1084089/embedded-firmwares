@@ -52,7 +52,7 @@ void print_proc_list(void) {
     uart_println();
 }
 
-extern int main(void);
+extern int hello(void);
 extern void terminal(void);
 extern uint32_t __get_PSP(void);
 

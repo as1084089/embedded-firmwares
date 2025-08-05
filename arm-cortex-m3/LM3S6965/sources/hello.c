@@ -1,9 +1,7 @@
-// main.c
-
 #include "types.h"
 #include "uart.h"
 
-int main() {
+int hello() {
     const char *hello = "Hello QEMU!";
 
     while (1) {

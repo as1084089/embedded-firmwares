@@ -3,7 +3,7 @@ LD = arm-none-eabi-ld
 OBJCOPY = arm-none-eabi-objcopy
 SIZE = arm-none-eabi-size
 
-TARGET = main
+TARGET = lm3s6965
 ASM_DIR = asms
 BUILD_DIR = builds
 SRC_DIR = sources
