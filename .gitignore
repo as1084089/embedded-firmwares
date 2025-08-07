@@ -20,3 +20,6 @@ Thumbs.db
 
 # backups
 *.backup
+
+# reference projects
+**/reference-projects/
