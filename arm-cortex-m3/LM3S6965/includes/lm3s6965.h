@@ -46,6 +46,33 @@ typedef struct {
 #define SYSCTL_RCGC2_R      (*((volatile uint32_t *)0x400FE108))
 #define SYSCTL_RCGC2_GPIOA  0x00000001
 
+//------------- ISR Vector Table -----------------------
+typedef struct {
+    void (*InitialSP)(void);
+    void (*Reset_Handler)(void);
+    void (*NMI_Handler)(void);
+    void (*HardFault_Handler)(void);
+    void (*MemManage_Handler)(void);
+    void (*BusFault_Handler)(void);
+    void (*UsageFault_Handler)(void);
+    void (*Reserved1)(void);
+    void (*Reserved2)(void);
+    void (*Reserved3)(void);
+    void (*Reserved4)(void);
+    void (*SVC_Handler)(void);
+    void (*DebugMon_Handler)(void);
+    void (*Reserved5)(void);
+    void (*PendSV_Handler)(void);
+    void (*SysTick_Handler)(void);
+} ISR_VectorTable;
+
+void Reset_Handler(void);
+void Default_Handler(void);
+void HardFault_Handler(void);
+void SVCall_Handler(void);
+void PendSV_Handler(void);
+void SysTick_Handler(void);
+
 //------------- IRQn Definitions -----------------------
 typedef enum IRQn {
     NonMaskableInt_IRQn   = -14,

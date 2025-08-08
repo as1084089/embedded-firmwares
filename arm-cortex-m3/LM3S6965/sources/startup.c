@@ -4,14 +4,6 @@
 #include "process.h"
 #include "context.h"
 
-// 함수 선언
-void Reset_Handler(void);
-void Default_Handler(void);
-void HardFault_Handler(void);
-void SVCall_Handler(void);
-void PendSV_Handler(void);
-void SysTick_Handler(void);
-
 void __systick_init(uint32_t ticks) {
     SysTick->LOAD   = ticks - 1;
     SysTick->VAL    = 0;
@@ -66,21 +58,18 @@ extern uint32_t _stack_start;
 
 // 인터럽트 벡터 테이블
 __attribute__ ((section(".isr_vector")))
-const uint32_t VectorTable[] = {
-    (uint32_t)&_stack_start,   // 초기 스택 포인터
-    (uint32_t)Reset_Handler, // 리셋 핸들러
-    (uint32_t)Default_Handler, // NMI
-    (uint32_t)HardFault_Handler, // Hard Fault
-    (uint32_t)Default_Handler, // Memory Management Fault
-    (uint32_t)Default_Handler, // Bus Fault
-    (uint32_t)Default_Handler, // Usage Fault
-    0, 0, 0, 0,                // Reserved
-    (uint32_t)SVCall_Handler, // SVCall
-    (uint32_t)Default_Handler, // Debug monitor
-    0,                         // Reserved
-    (uint32_t)PendSV_Handler, // PendSV
-    (uint32_t)SysTick_Handler, // SysTick
-    // 여기에 추가 인터럽트 핸들러들 작성 가능
+const ISR_VectorTable vector_table = {
+    .InitialSP          = (void*)&_stack_start,
+    .Reset_Handler      = Reset_Handler,
+    .NMI_Handler        = Default_Handler,
+    .HardFault_Handler  = HardFault_Handler,
+    .MemManage_Handler  = Default_Handler,
+    .BusFault_Handler   = Default_Handler,
+    .UsageFault_Handler = Default_Handler,
+    .SVC_Handler        = SVCall_Handler,
+    .DebugMon_Handler   = Default_Handler,
+    .PendSV_Handler     = PendSV_Handler,
+    .SysTick_Handler    = SysTick_Handler,
 };
 
 // 리셋 핸들러
