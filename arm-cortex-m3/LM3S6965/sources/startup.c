@@ -53,6 +53,7 @@ void print_proc_list(void) {
 
 extern int hello(void);
 extern void terminal(void);
+extern void __idle_task(void);
 extern uint32_t __get_PSP(void);
 
 // 외부 심볼 (링커 스크립트에서 제공)
@@ -99,11 +100,11 @@ void Reset_Handler(void)
     }
 
     __init_psp_pool();
+    __init_process_context(__idle_task);
     __init_process_context(terminal);
 
     __systick_init(50000);
 
-    __start();
     while (1);
 }
 

@@ -2,47 +2,39 @@
 #include "uart.h"
 #include "core_cm3.h"
 
-__attribute__((naked)) void trigger_svcall(void) {
-    __asm__ __volatile__ ("SVC #0\n");
-}
-
-__attribute__((naked)) void __save_proc_context(void) {
-    __asm__ __volatile__ (
-        "cpsid  i                   \n"
-        "mrs    r0,     psp         \n"
-        "stmdb  r0!,    {r4-r11}    \n"
-        "msr    psp,    r0          \n"
-        "bx     lr                  \n"
-    );
-}
-
-__attribute__((naked)) void __restore_proc_context(__pcb_t *task) {
-    addr_t sp = task->process_stack_pointer;
-    __asm__ __volatile__ (
-        "msr        psp,        %[psp]  \n"
-        "ldmia      %[psp]!,    {r4-r11}\n"
-        "msr        psp,        %[psp]  \n"
-        "cpsie      i                   \n"
-        "ldr        lr,     =0xFFFFFFFD \n"
-        "bx         lr                  \n"
-        :
-        : [psp] "r" (sp)
-        : "memory"
-    );
-}
+#ifndef __CONTEXT_ASM__
 
 void __schedule(void) {
-    __save_proc_context();
-    __current_running->process_stack_pointer = (addr_t)__get_PSP();
+    __pcb_t* next = NULL;
+    register __pcb_t* tmp __asm__("r1");
+    tmp = __current_running;
 
-    __pcb_t *next = __search_ready_proc();
-    if (next == NULL) {
-        __restore_proc_context(__current_running);
-
-        while(1);
+    // If there is a running task, save its context
+    if (tmp != NULL) {
+        __save_proc_context();
+        __current_running->process_stack_pointer = (addr_t)__get_PSP();
     }
-    __current_running->process_state = READY;
-    __current_running = next;
-    __current_running->process_state = RUNNING;
-    __restore_proc_context(next);
+
+    // Find the next READY process
+    next = __search_ready_proc();
+
+    if (next == NULL) {
+        if (tmp != NULL) {
+            // If there is a running task, keep running it (fallback)
+            __restore_proc_context(__current_running);
+            while (1); // (Should never reach here)
+        } else {
+            // If there is nothing to run, reset the system
+            SCB->AIRCR = (0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk;
+            while (1) { __NOP(); }
+        }
+    } else {
+        if (__current_running)
+            __current_running->process_state = READY;
+        __current_running = next;
+        __current_running->process_state = RUNNING;
+        __restore_proc_context(next);
+    }
 }
+
+#endif // !__ASM_CONTEXT_S__

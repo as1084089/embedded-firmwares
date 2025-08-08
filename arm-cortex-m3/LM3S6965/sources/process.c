@@ -8,7 +8,7 @@ __pcb_t *__current_running;
 
 void __init_psp_pool() {
     __current_running = NULL;
-    __pp.process_counter = 1;
+    __pp.process_counter = 0;
     for (uint32_t iter = 0; iter < __MAX_PROC_NUM; iter++) {
         __proc_list[iter].process_id = -1;
         __proc_list[iter].process_stack_pointer = 0;
@@ -16,14 +16,6 @@ void __init_psp_pool() {
     }
 
     __pp.psp_pool_top = &_psp_pool_start;
-
-    // Idle task initialization
-    __pcb_t *taskptr = &__proc_list[0];
-    taskptr->process_id = 0;
-    taskptr->process_stack_pointer = __pp.psp_pool_top;
-    taskptr->process_state = READY;
-
-    __pp.psp_pool_top -= __PSP_SIZE;
 }
 
 __pcb_t* __init_process_control_block() {
@@ -46,8 +38,6 @@ void __init_process_context(addr_t func) {
 
     ret->process_state = READY;
     uint32_t *psp = (uint32_t*)ret->process_stack_pointer;
-    // uart_print_str("sp:= ");
-    // uart_print_hex((uint32_t)psp); PR_ENDL;
 
     // Exception Stack Frame: r0~r3, r12, lr, pc, xPSR
     *(--psp) = 0x01000000;     // xPSR (T-bit = 1)
@@ -73,7 +63,19 @@ void __init_process_context(addr_t func) {
 }
 
 __pcb_t* __search_ready_proc() {
+    int32_t running = -1;
     for (int32_t iter = 0; iter < __MAX_PROC_NUM; iter++) {
+        if (__proc_list[iter].process_state == RUNNING) {
+            running = iter;
+            break;
+        }
+    }
+    for (int32_t iter = running; iter < __MAX_PROC_NUM; iter++) {
+        if (__proc_list[iter].process_state == READY) {
+            return &__proc_list[iter];
+        }
+    }
+    for (int32_t iter = 0; iter < running; iter++) {
         if (__proc_list[iter].process_state == READY) {
             return &__proc_list[iter];
         }

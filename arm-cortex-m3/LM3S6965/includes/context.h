@@ -6,6 +6,8 @@
 
 #pragma once
 
+#define __CONTEXT_ASM__
+
 typedef struct proc_context {
     // Exception Stack Frame
     uint32_t r_PSR;
@@ -28,9 +30,8 @@ typedef struct proc_context {
     uint32_t r_R4;
 } __context_t;
 
-void trigger_svcall(void);
-void __save_proc_context(void);
-void __restore_proc_context(__pcb_t *);
+extern void __save_proc_context(void);
+extern void __restore_proc_context(__pcb_t *);
 void __schedule(void);
 
 #endif /* D33974CD_AF5C_4EFB_A13A_825C08365082 */
