@@ -12,7 +12,7 @@ void SVCall_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 
-void systick_init(uint32_t ticks) {
+void __systick_init(uint32_t ticks) {
     SysTick->LOAD   = ticks - 1;
     SysTick->VAL    = 0;
     SysTick->CTRL   = SysTick_CTRL_CLKSOURCE_Msk
@@ -45,8 +45,7 @@ void print_proc_list(void) {
 
         if (&__proc_list[i] == __current_running) {
             uart_print_str("<- current");
-        }
-        PR_ENDL;
+        } PR_ENDL;
     }
     uart_print_str("------------------------------------------"); PR_ENDL;
     uart_println();
@@ -99,10 +98,10 @@ void Reset_Handler(void)
         *dst++ = 0;
     }
 
-    __init_process_pool();
+    __init_psp_pool();
     __init_process_context(terminal);
 
-    systick_init(50000);
+    __systick_init(50000);
 
     __start();
     while (1);

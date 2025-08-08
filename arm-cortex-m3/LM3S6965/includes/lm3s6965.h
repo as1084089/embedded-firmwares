@@ -40,7 +40,7 @@ typedef struct {
 
 //------------- Peripheral Pointers --------------------
 #define GPIOA               ((GPIO_TypeDef *) GPIO_PORTA_BASE)
-#define UART0               ((UART_TypeDef  *) UART0_BASE)
+#define UART0               ((UART_TypeDef *) UART0_BASE)
 
 //------------- Clock Control (Mock) -------------------
 #define SYSCTL_RCGC2_R      (*((volatile uint32_t *)0x400FE108))

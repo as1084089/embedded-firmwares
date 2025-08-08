@@ -32,7 +32,7 @@ extern __pp_t __pp;
 extern __pcb_t __proc_list[__MAX_PROC_NUM];
 extern __pcb_t *__current_running;
 
-void        __init_process_pool();
+void        __init_psp_pool();
 __pcb_t*    __init_process_control_block();
 void        __init_process_context(addr_t func);
 __pcb_t*    __search_ready_proc();
@@ -43,9 +43,9 @@ static inline void __start() {
     __current_running->process_state = RUNNING;
 
     void* sp = __current_running->process_stack_pointer;
-    __asm__ volatile (
+    __asm__ __volatile__ (
         "msr psp, %[psp]\n"
-        "movs r0, #2\n"
+        "movs r0, #3\n"
         "msr control, r0\n"
         "isb\n"
         :: [psp] "r" (sp) : "memory", "r0"

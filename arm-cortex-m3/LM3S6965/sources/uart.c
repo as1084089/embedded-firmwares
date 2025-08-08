@@ -5,33 +5,37 @@
 #define ASCII_CCHAR_OFFSET 'A'
 #define ASCII_SCHAR_OFFSET 'a'
 
-static char uart_print_buf[10];
+static char uart_print_buf[32];
 
 static void clear_buf(void) {
-    for (int32_t iter = 0; iter < 10; iter++) {
+    for (int32_t iter = 0; iter < 32; iter++) {
         uart_print_buf[iter] = 0;
     }
 }
 
-void uart_print_char(char c) {
-    volatile uint32_t *uport = (uint32_t *)UART0_BASE;
-    *uport = c;
+void uart_putc(char c) {
+    UART0->DR = c;
+}
+
+char uart_getc(void) {
+    while (UART0->FR & (1 << 4));
+    return (char)(UART0->DR & 0xFF);
 }
 
 void uart_print_str(const char *str) {
     while (*str) {
-        uart_print_char(*str++);
+        uart_putc(*str++);
     }
 }
 
 void uart_print_dec(int32_t num) {
     int32_t iter = 0;
     if (num == 0) {
-        uart_print_char('0');
+        uart_putc('0');
         return;
     }
     else if (num < 0) {
-        uart_print_char('-');
+        uart_putc('-');
         num *= -1;
     }
     while (num > 0) {
@@ -39,7 +43,7 @@ void uart_print_dec(int32_t num) {
         num /= 10;
     }
     while (iter--) {
-        uart_print_char(uart_print_buf[iter]);
+        uart_putc(uart_print_buf[iter]);
     }
     clear_buf();
 }
@@ -47,13 +51,13 @@ void uart_print_dec(int32_t num) {
 void uart_print_hex(uint32_t num) {
     int32_t iter = 0;
     if (num == 0) {
-        uart_print_char('0');
-        uart_print_char('x');
-        uart_print_char('0');
+        uart_putc('0');
+        uart_putc('x');
+        uart_putc('0');
         return;
     }
-    uart_print_char('0');
-    uart_print_char('x');
+    uart_putc('0');
+    uart_putc('x');
     while (num > 0) {
         uart_print_buf[iter++] = \
             (num % 16) > 9 ? \
@@ -62,16 +66,11 @@ void uart_print_hex(uint32_t num) {
         num >>= 4;
     }
     while (iter--) {
-        uart_print_char(uart_print_buf[iter]);
+        uart_putc(uart_print_buf[iter]);
     }
     clear_buf();
 }
 
 void uart_println(void) {
-    uart_print_char('\n');
-}
-
-char uart_getc(void) {
-    while (UART0->FR & (1 << 4));
-    return (char)(UART0->DR & 0xFF);
+    uart_putc('\n');
 }

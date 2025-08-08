@@ -9,7 +9,6 @@ BUILD_DIR = builds
 SRC_DIR = sources
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
-#ASMS = $(patsubst %.c,$(SRC_DIR)/%.s,$(notdir $(SRCS)))
 ASMS = $(patsubst %.c,$(ASM_DIR)/%.s,$(notdir $(SRCS)))
 OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 

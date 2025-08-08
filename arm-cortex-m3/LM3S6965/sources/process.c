@@ -1,11 +1,12 @@
 #include "process.h"
 #include "uart.h"
+#include "core_cm3.h"
 
 __pp_t __pp;
 __pcb_t __proc_list[__MAX_PROC_NUM];
 __pcb_t *__current_running;
 
-void __init_process_pool() {
+void __init_psp_pool() {
     __current_running = NULL;
     __pp.process_counter = 1;
     for (uint32_t iter = 0; iter < __MAX_PROC_NUM; iter++) {
@@ -82,5 +83,7 @@ __pcb_t* __search_ready_proc() {
 }
 
 void __idle_task(void) {
-    while (1) {}
+    while (1) {
+        // uart_print_str("idle\n");
+    }
 }

@@ -1,4 +1,5 @@
 #include "context.h"
+#include "uart.h"
 #include "core_cm3.h"
 
 __attribute__((naked)) void trigger_svcall(void) {
