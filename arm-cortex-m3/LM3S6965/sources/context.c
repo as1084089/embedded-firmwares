@@ -2,6 +2,10 @@
 #include "uart.h"
 #include "core_cm3.h"
 
+/* 2025-08-09 Sat. Dahun Kim
+ * Note: This file is not included in the build, and is provided solely for reference and to aid in understanding the assembly code.
+ * For the source files that actually contribute to the firmware binary, please refer to context_asm.s.
+ */
 #ifndef __CONTEXT_ASM__
 
 void __schedule(void) {
@@ -37,4 +41,4 @@ void __schedule(void) {
     }
 }
 
-#endif // !__ASM_CONTEXT_S__
+#endif // !__CONTEXT_ASM__
