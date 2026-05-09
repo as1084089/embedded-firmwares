@@ -5,14 +5,6 @@
 #define ASCII_CCHAR_OFFSET 'A'
 #define ASCII_SCHAR_OFFSET 'a'
 
-static char uart_print_buf[32];
-
-static void clear_buf(void) {
-    for (int32_t iter = 0; iter < 32; iter++) {
-        uart_print_buf[iter] = 0;
-    }
-}
-
 void uart_putc(char c) {
     UART0->DR = c;
 }
@@ -29,26 +21,33 @@ void uart_print_str(const char *str) {
 }
 
 void uart_print_dec(int32_t num) {
+    /* Stack-local buffer makes this reentrant: safe to call from both
+     * thread context and ISR (e.g., HardFault_Handler) without races. */
+    char buf[12];
     int32_t iter = 0;
     if (num == 0) {
         uart_putc('0');
         return;
     }
-    else if (num < 0) {
+    /* INT32_MIN cannot be negated in two's complement; handle as unsigned. */
+    uint32_t u;
+    if (num < 0) {
         uart_putc('-');
-        num *= -1;
+        u = (uint32_t)(-(num + 1)) + 1u;
+    } else {
+        u = (uint32_t)num;
     }
-    while (num > 0) {
-        uart_print_buf[iter++] = ASCII_DIGIT_OFFSET + (num % 10);
-        num /= 10;
+    while (u > 0) {
+        buf[iter++] = ASCII_DIGIT_OFFSET + (u % 10);
+        u /= 10;
     }
     while (iter--) {
-        uart_putc(uart_print_buf[iter]);
+        uart_putc(buf[iter]);
     }
-    clear_buf();
 }
 
 void uart_print_hex(uint32_t num) {
+    char buf[8];
     int32_t iter = 0;
     if (num == 0) {
         uart_putc('0');
@@ -59,16 +58,15 @@ void uart_print_hex(uint32_t num) {
     uart_putc('0');
     uart_putc('x');
     while (num > 0) {
-        uart_print_buf[iter++] = \
+        buf[iter++] = \
             (num % 16) > 9 ? \
             (num % 16) + ASCII_CCHAR_OFFSET - 10 : \
             (num % 16) + ASCII_DIGIT_OFFSET;
         num >>= 4;
     }
     while (iter--) {
-        uart_putc(uart_print_buf[iter]);
+        uart_putc(buf[iter]);
     }
-    clear_buf();
 }
 
 void uart_println(void) {

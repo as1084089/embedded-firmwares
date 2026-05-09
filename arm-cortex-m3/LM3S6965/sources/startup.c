@@ -4,7 +4,7 @@
 #include "process.h"
 #include "context.h"
 
-void __systick_init(uint32_t ticks) {
+void systick_init(uint32_t ticks) {
     SysTick->LOAD   = ticks - 1;
     SysTick->VAL    = 0;
     SysTick->CTRL   = SysTick_CTRL_CLKSOURCE_Msk
@@ -12,12 +12,12 @@ void __systick_init(uint32_t ticks) {
                     | SysTick_CTRL_ENABLE_Msk;
 }
 
-const char* ps_state_str(__ps_t state) {
+const char* ps_state_str(proc_state_t state) {
     switch (state) {
-        case 0: return "READY   ";
-        case 1: return "RUNNING ";
-        case 2: return "WAITING ";
-        default: return "UNKNOWN ";
+        case RUNNING: return "RUNNING ";
+        case READY:   return "READY   ";
+        case WAITING: return "WAITING ";
+        default:      return "UNKNOWN ";
     }
 }
 
@@ -25,17 +25,17 @@ void print_proc_list(void) {
     uart_println();
     uart_print_str(" ID |  STATE   |    PSP      | CURRENT "); PR_ENDL;
     uart_print_str("------------------------------------------"); PR_ENDL;
-    for (int i = 0; i < __MAX_PROC_NUM; i++) {
+    for (int i = 0; i < MAX_PROC_NUM; i++) {
         uart_print_str(" ");
-        uart_print_dec(__proc_list[i].process_id);
+        uart_print_dec(g_proc_list[i].process_id);
         uart_print_str("  | ");
 
-        uart_print_str(ps_state_str(__proc_list[i].process_state));
+        uart_print_str(ps_state_str(g_proc_list[i].process_state));
         uart_print_str("| ");
-        uart_print_hex((uint32_t)__proc_list[i].process_stack_pointer);
+        uart_print_hex((uint32_t)g_proc_list[i].process_stack_pointer);
         uart_print_str(" | ");
 
-        if (&__proc_list[i] == __current_running) {
+        if (&g_proc_list[i] == g_current_running) {
             uart_print_str("<- current");
         } PR_ENDL;
     }
@@ -45,7 +45,7 @@ void print_proc_list(void) {
 
 extern int hello(void);
 extern void terminal(void);
-extern void __idle_task(void);
+extern void idle_task(void);
 extern uint32_t __get_PSP(void);
 
 // 외부 심볼 (링커 스크립트에서 제공)
@@ -88,19 +88,27 @@ void Reset_Handler(void)
         *dst++ = 0;
     }
 
-    __init_psp_pool();
-    __init_process_context(__idle_task);
-    __init_process_context(terminal);
+    proc_pool_init();
+    proc_init(idle_task);
+    proc_init(terminal);
 
-    __systick_init(50000);
+    systick_init(50000);
 
     while (1);
 }
 
 void HardFault_Handler(void) {
-    uint32_t* psp = (uint32_t*)__current_running->process_stack_pointer;
-
     uart_print_str("HardFault!\n");
+
+    /* Guard: a HardFault can occur before the first dispatch, when
+     * g_current_running is still NULL. Don't deref and trigger a
+     * fault-in-fault that would lose all diagnostic output. */
+    if (g_current_running == NULL) {
+        uart_print_str("(no current process — fault before first dispatch)\n");
+        while (1);
+    }
+
+    uint32_t* psp = (uint32_t*)g_current_running->process_stack_pointer;
 
     print_proc_list();
 
@@ -128,7 +136,7 @@ void SVCall_Handler(void)
 }
 
 __attribute__((naked)) void PendSV_Handler(void) {
-    __schedule();
+    kernel_schedule();
 }
 
 void SysTick_Handler(void) {

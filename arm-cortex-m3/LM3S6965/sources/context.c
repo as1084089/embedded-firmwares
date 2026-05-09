@@ -6,26 +6,26 @@
  * Note: This file is not included in the build, and is provided solely for reference and to aid in understanding the assembly code.
  * For the source files that actually contribute to the firmware binary, please refer to context_asm.s.
  */
-#ifndef __CONTEXT_ASM__
+#ifndef CONTEXT_USE_ASM
 
-void __schedule(void) {
-    __pcb_t* next = NULL;
-    register __pcb_t* tmp __asm__("r1");
-    tmp = __current_running;
+void kernel_schedule(void) {
+    pcb_t* next = NULL;
+    register pcb_t* tmp __asm__("r1");
+    tmp = g_current_running;
 
     // If there is a running task, save its context
     if (tmp != NULL) {
-        __save_proc_context();
-        __current_running->process_stack_pointer = (addr_t)__get_PSP();
+        ctx_save();
+        g_current_running->process_stack_pointer = (addr_t)__get_PSP();
     }
 
     // Find the next READY process
-    next = __search_ready_proc();
+    next = proc_find_ready();
 
     if (next == NULL) {
         if (tmp != NULL) {
             // If there is a running task, keep running it (fallback)
-            __restore_proc_context(__current_running);
+            ctx_restore(g_current_running);
             while (1); // (Should never reach here)
         } else {
             // If there is nothing to run, reset the system
@@ -33,12 +33,12 @@ void __schedule(void) {
             while (1) { __NOP(); }
         }
     } else {
-        if (__current_running)
-            __current_running->process_state = READY;
-        __current_running = next;
-        __current_running->process_state = RUNNING;
-        __restore_proc_context(next);
+        if (g_current_running)
+            g_current_running->process_state = READY;
+        g_current_running = next;
+        g_current_running->process_state = RUNNING;
+        ctx_restore(next);
     }
 }
 
-#endif // !__CONTEXT_ASM__
+#endif // !CONTEXT_USE_ASM

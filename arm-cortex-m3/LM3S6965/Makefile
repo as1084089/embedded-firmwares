@@ -38,7 +38,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 
 # Preprocessed Assembly file (.S) → object
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # C file → assembly (.s) output for analysis/debug
 $(ASM_DIR)/%.s: $(SRC_DIR)/%.c | $(ASM_DIR)

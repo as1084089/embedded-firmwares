@@ -6,7 +6,7 @@
 
 #pragma once
 
-#define __CONTEXT_ASM__
+#define CONTEXT_USE_ASM
 
 typedef struct proc_context {
     // Exception Stack Frame
@@ -28,10 +28,10 @@ typedef struct proc_context {
     uint32_t r_R6;
     uint32_t r_R5;
     uint32_t r_R4;
-} __context_t;
+} proc_context_t;
 
-extern void __save_proc_context(void);
-extern void __restore_proc_context(__pcb_t *);
-void __schedule(void);
+extern void ctx_save(void);
+extern void ctx_restore(pcb_t *);
+void kernel_schedule(void);
 
 #endif /* D33974CD_AF5C_4EFB_A13A_825C08365082 */

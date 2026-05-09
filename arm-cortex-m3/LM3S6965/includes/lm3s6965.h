@@ -1,5 +1,5 @@
-#ifndef __LM3S6965_BSP_H__
-#define __LM3S6965_BSP_H__
+#ifndef LM3S6965_BSP_H
+#define LM3S6965_BSP_H
 
 #include <stdint.h>
 // #include "core_cm3.h" // CMSIS Core Header
@@ -85,4 +85,4 @@ typedef enum IRQn {
     // ...
 } IRQn_Type;
 
-#endif // __LM3S6965_BSP_H__
+#endif // LM3S6965_BSP_H
